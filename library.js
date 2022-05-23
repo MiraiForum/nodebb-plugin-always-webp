@@ -3,77 +3,82 @@
 const nconf = require.main.require('nconf');
 const winston = require.main.require('winston');
 const controllers = require('./lib/controllers');
-
+const fs = require('fs');
+const os = require('os');
+const meta = require('../src/meta');
+const node_image = require.main.require('./src/image');
+const uploadsController = require.main.require('./src/controllers/uploads.js');
 const routeHelpers = require.main.require('./src/routes/helpers');
+const settings = require.main.require('./src/meta/settings');
 
 const plugin = {};
+let plugin_settings = {};
+
+function requireSharp() {
+		const sharp = require('sharp');
+		if (os.platform() === 'win32') {
+				// https://github.com/lovell/sharp/issues/1259
+				sharp.cache(false);
+		}
+		return sharp;
+}
+
 
 plugin.init = async (params) => {
-	const { router, middleware/* , controllers */ } = params;
+		const {
+				router,
+				middleware/* , controllers */
+		} = params;
 
-	/**
-	 * We create two routes for every view. One API call, and the actual route itself.
-	 * Use the `setupPageRoute` helper and NodeBB will take care of everything for you.
-	 *
-	 * Other helpers include `setupAdminPageRoute` and `setupAPIRoute`
-	 * */
-	routeHelpers.setupPageRoute(router, '/quickstart', middleware, [(req, res, next) => {
-		winston.info(`[plugins/quickstart] In middleware. This argument can be either a single middleware or an array of middlewares`);
-		setImmediate(next);
-	}], (req, res) => {
-		winston.info(`[plugins/quickstart] Navigated to ${nconf.get('relative_path')}/quickstart`);
-		res.render('quickstart', { uid: req.uid });
-	});
+		routeHelpers.setupAdminPageRoute(router, '/admin/plugins/always-webp', middleware, [], controllers.renderAdminPage);
 
-	routeHelpers.setupAdminPageRoute(router, '/admin/plugins/quickstart', middleware, [], controllers.renderAdminPage);
+		plugin_settings = await settings.get('always-webp');
+		if (!plugin_settings.hasOwnProperty("quality") || plugin_settings["quality"] === 0){
+				plugin_settings["quality"] = 80;
+				settings.set("always-webp",plugin_settings);
+		}
 };
 
-/**
- * If you wish to add routes to NodeBB's RESTful API, listen to the `static:api.routes` hook.
- * Define your routes similarly to above, and allow core to handle the response via the
- * built-in helpers.formatApiResponse() method.
- *
- * In this example route, the `ensureLoggedIn` middleware is added, which means a valid login
- * session or bearer token (which you can create via ACP > Settings > API Access) needs to be
- * passed in.
- *
- * To call this example route:
- *   curl -X GET \
- * 		http://example.org/api/v3/plugins/quickstart/test \
- * 		-H "Authorization: Bearer some_valid_bearer_token"
- *
- * Will yield the following response JSON:
- * 	{
- *		"status": {
- *			"code": "ok",
- *			"message": "OK"
- *		},
- *		"response": {
- *			"foobar": "test"
- *		}
- *	}
- */
-plugin.addRoutes = async ({ router, middleware, helpers }) => {
-	const middlewares = [
-		middleware.ensureLoggedIn,			// use this if you want only registered users to call this route
-		// middleware.admin.checkPrivileges,	// use this to restrict the route to administrators
-	];
-
-	routeHelpers.setupApiRoute(router, 'get', '/quickstart/:param1', middlewares, (req, res) => {
-		helpers.formatApiResponse(200, res, {
-			foobar: req.params.param1,
-		});
-	});
-};
 
 plugin.addAdminNavigation = (header) => {
-	header.plugins.push({
-		route: '/plugins/quickstart',
-		icon: 'fa-tint',
-		name: 'Quickstart',
-	});
+		header.plugins.push({
+				route: '/plugins/always-webp',
+				icon: 'fa-tint',
+				name: 'Quickstart',
+		});
 
-	return header;
+		return header;
+};
+
+plugin.uploadImgHook = async function (data) {
+		let {
+				image,
+				uid,
+				folder
+		} = data;
+
+
+		await node_image.isFileTypeAllowed(image.path);
+
+		let fileObj = await uploadsController.uploadFile(uid, image);
+		// sharp can't save svgs skip resize for them
+		const isSVG = image.type === 'image/svg+xml';
+		if (isSVG) {
+				return fileObj;
+		}
+
+		const sharp = requireSharp();
+		const buffer = await fs.promises.readFile(fileObj.path);
+		const sharpImage = sharp(buffer, {
+				failOnError: true,
+				animated: fileObj.path.endsWith('gif'),
+		});
+
+		sharpImage.rotate(); // auto-orients based on exif data
+		sharpImage.webp({ quality: plugin_settings.quality });
+		await sharpImage.toFile(fileObj.path);
+		return { url: fileObj.url };
+		//
 };
 
 module.exports = plugin;

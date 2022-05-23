@@ -1,11 +1,11 @@
 {
-  "name": "nodebb-plugin-quickstart",
+  "name": "nodebb-plugin-always-webp",
   "version": "0.4.2",
-  "description": "A starter kit for quickly creating NodeBB plugins",
+  "description": "总是将上传的图片变成webp",
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nodebb/nodebb-plugin-quickstart"
+    "url": "https://github.com/MiraiForum/nodebb-plugin-alwaysWebp"
   },
   "keywords": [
     "nodebb",

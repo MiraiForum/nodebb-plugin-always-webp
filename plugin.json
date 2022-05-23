@@ -1,6 +1,6 @@
 {
-	"id": "nodebb-plugin-quickstart",
-	"url": "https://github.com/NodeBB/nodebb-plugin-quickstart",
+	"id": "nodebb-plugin-always-webp",
+	"url": "https://github.com/MiraiForum/nodebb-plugin-alwaysWebp",
 	"library": "./library.js",
 	"hooks": [
 		{
@@ -11,7 +11,10 @@
 		},
 		{
 			"hook": "filter:admin.header.build", "method": "addAdminNavigation"
-		}
+		},
+	  {
+		"hook": "filter:uploadImage","method": "uploadImgHook"
+	  }
 	],
 	"staticDirs": {
 		"static": "./static"
