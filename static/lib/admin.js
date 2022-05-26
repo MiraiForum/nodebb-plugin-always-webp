@@ -23,7 +23,7 @@ define('admin/plugins/always-webp/main.js', [
 						alerts.error('质量设置错误');
 						return;
 				}
-				settings.save('quickstart', $('.always-webp-settings'), function () {
+				settings.save('always-webp', $('.always-webp-settings'), function () {
 						alerts.alert({
 								type: 'success',
 								alert_id: 'always-webp-saved',

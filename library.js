@@ -32,7 +32,7 @@ plugin.init = async (params) => {
 		routeHelpers.setupAdminPageRoute(router, '/admin/plugins/always-webp', middleware, [], controllers.renderAdminPage);
 
 		plugin_settings = await settings.get('always-webp');
-		if (!plugin_settings.hasOwnProperty('quality') || plugin_settings['quality'] === 0) {
+		if (!plugin_settings.hasOwnProperty('quality')) {
 				plugin_settings['quality'] = 80;
 				settings.set('always-webp', plugin_settings);
 		}

@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-always-webp",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "总是将上传的图片变成webp",
   "main": "library.js",
   "repository": {
