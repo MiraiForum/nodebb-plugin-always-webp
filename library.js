@@ -36,6 +36,7 @@ plugin.init = async (params) => {
 				plugin_settings['quality'] = 80;
 				settings.set('always-webp', plugin_settings);
 		}
+		plugin_settings['quality'] = Number(plugin_settings['quality']);
 };
 
 
