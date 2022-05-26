@@ -33,9 +33,9 @@ plugin.init = async (params) => {
 		routeHelpers.setupAdminPageRoute(router, '/admin/plugins/always-webp', middleware, [], controllers.renderAdminPage);
 
 		plugin_settings = await settings.get('always-webp');
-		if (!plugin_settings.hasOwnProperty("quality") || plugin_settings["quality"] === 0){
-				plugin_settings["quality"] = 80;
-				settings.set("always-webp",plugin_settings);
+		if (!plugin_settings.hasOwnProperty('quality') || plugin_settings['quality'] === 0) {
+				plugin_settings['quality'] = 80;
+				settings.set('always-webp', plugin_settings);
 		}
 };
 
@@ -44,7 +44,7 @@ plugin.addAdminNavigation = (header) => {
 		header.plugins.push({
 				route: '/plugins/always-webp',
 				icon: 'fa-tint',
-				name: 'Quickstart',
+				name: 'AlwaysWebp',
 		});
 
 		return header;
@@ -59,26 +59,28 @@ plugin.uploadImgHook = async function (data) {
 
 
 		await node_image.isFileTypeAllowed(image.path);
-
-		let fileObj = await uploadsController.uploadFile(uid, image);
 		// sharp can't save svgs skip resize for them
 		const isSVG = image.type === 'image/svg+xml';
 		if (isSVG) {
-				return fileObj;
+				return await uploadsController.uploadFile(uid, image);
 		}
-
 		const sharp = requireSharp();
-		const buffer = await fs.promises.readFile(fileObj.path);
+		const buffer = await fs.promises.readFile(image.path);
 		const sharpImage = sharp(buffer, {
 				failOnError: true,
-				animated: fileObj.path.endsWith('gif'),
+				animated: image.path.endsWith('gif'),
 		});
 
 		sharpImage.rotate(); // auto-orients based on exif data
 		sharpImage.webp({ quality: plugin_settings.quality });
-		await sharpImage.toFile(fileObj.path);
-		return { url: fileObj.url };
-		//
+		await sharpImage.toFile(image.path);
+		let fileObj = await uploadsController.uploadFile(uid, image);
+		return {
+				url: fileObj.url,
+				path: fileObj.path,
+				name: fileObj.name,
+		};
+
 };
 
 module.exports = plugin;

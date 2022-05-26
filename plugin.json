@@ -19,18 +19,10 @@
 	"staticDirs": {
 		"static": "./static"
 	},
-	"less": [
-		"static/less/quickstart.less"
-	],
-	"scripts": [
-		"static/lib/main.js"
-	],
-	"acpScripts": [
-		"static/lib/acp-main.js"
-	],
+
+
 	"modules": {
-		"../client/quickstart.js": "./static/lib/quickstart.js",
-		"../admin/plugins/quickstart.js": "./static/lib/admin.js"
+		"../admin/plugins/always-webp/main.js": "./static/lib/admin.js"
 	},
 	"templates": "static/templates"
 }

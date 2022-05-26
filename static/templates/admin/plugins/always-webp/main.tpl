@@ -4,14 +4,14 @@
 		<div class="col-sm-10 col-xs-12">
 			<p class="lead">
 				总是将图片压缩成Webp
-
+			</p>
+			<p class="lead">
+				需要将nodebb自动压缩图像功能关闭获得最佳效果
 			</p>
 			<div class="form-group">
 				<label for="quality">质量设置</label>
 				<input type="number" id="quality" name="quality" title="质量设置" class="form-control" placeholder="0-100">
 			</div>
-
-
 
 		</div>
 	</div>
