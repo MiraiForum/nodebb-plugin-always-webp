@@ -5,7 +5,6 @@ const winston = require.main.require('winston');
 const controllers = require('./lib/controllers');
 const fs = require('fs');
 const os = require('os');
-const meta = require('../src/meta');
 const node_image = require.main.require('./src/image');
 const uploadsController = require.main.require('./src/controllers/uploads.js');
 const routeHelpers = require.main.require('./src/routes/helpers');
